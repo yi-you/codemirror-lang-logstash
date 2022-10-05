@@ -12,16 +12,43 @@ export const logstashLanguage = LRLanguage.define({
         Application: foldInside
       }),
       styleTags({
-        Identifier: t.variableName,
-        Boolean: t.bool,
-        String: t.string,
+        "get set async static": t.modifier,
+        "if else": t.controlKeyword,
+        "not in and or xor nand": t.operatorKeyword,
+        "let var const function class extends": t.definitionKeyword,
+        "input filter output": t.keyword,
+        super: t.atom,
+        BooleanLiteral: t.bool,
+        this: t.self,
+        null: t.null,
+        Star: t.modifier,
+        VariableName: t.variableName,
+        "CallExpression/VariableName TaggedTemplateExpression/VariableName": t.function(t.variableName),
+        VariableDefinition: t.definition(t.variableName),
+        Label: t.labelName,
+        PropertyName: t.propertyName,
+        PrivatePropertyName: t.special(t.propertyName),
+        "CallExpression/MemberExpression/PropertyName": t.function(t.propertyName),
+        "FunctionDeclaration/VariableDefinition": t.function(t.definition(t.variableName)),
+        "ClassDeclaration/VariableDefinition": t.definition(t.className),
         LineComment: t.lineComment,
-        "( )": t.paren
+        number: t.number,
+        string: t.string,
+        compareOperator: t.compareOperator,
+        regexp: t.regexp,
+        "=>": t.definitionOperator,
+        "( )": t.paren,
+        "[ ]": t.squareBracket,
+        "{ }": t.brace,
+        ".": t.derefOperator,
+        ", ;": t.separator,
+        name: t.attributeName,
+        value: t.attributeValue
       })
     ]
   }),
   languageData: {
-    commentTokens: {line: ";"}
+    commentTokens: {line: "#"}
   }
 })
 
