@@ -1,0 +1,10 @@
+@tokens {
+    word { $[a-zA-Z0-9]+ }
+    wordFirstCharAlpha { $[a-z] word? }
+    @precedence {wordFirstCharAlpha, word}
+}
+@top Arg { (Name "=" Value | Value) }
+words { (word | wordFirstCharAlpha )}
+identifier { wordFirstCharAlpha }
+Name { identifier }
+Value { words }
