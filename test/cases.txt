@@ -1,41 +1,50 @@
 # Booleans
 
-#t
-#f
+input {
+  file {
+  }
+}
 
 ==>
 
-Program(Boolean, Boolean)
+LogstashConfig(PluginSection(PluginType,"{",BranchOrPlugin(Plugin("{","}")),"}"))
 
-# Identifiers
+# Booleans1
 
-one
-Two_Three
+input {
+  file {
+    path => "/var/log/messages"
+    type => "syslog"
+  }
 
-==>
-
-Program(Identifier, Identifier)
-
-# Strings
-
-"hello"
-"one\"\\two"
-
-==>
-
-Program(String, String)
-
-# Applications
-
-(begin
-  (when #t
-    (print (concat "hello" " " "world")))
-  (print "DONE"))
+  file {
+    path => "/var/log/apache/access.log"
+    type => "apache"
+  }
+}
 
 ==>
 
-Program(Application(
-  Identifier,
-  Application(Identifier, Boolean, Application(
-    Identifier, Application(Identifier, String, String, String)))
-  Application(Identifier, String)))
+LogstashConfig(PluginSection(PluginType,"{",BranchOrPlugin(Plugin("{",Attribute,"}")),"}"))
+
+# Booleans2
+
+input {
+  file {
+    path => "/var/log/messages"
+    type => "syslog"
+  }
+
+  file {
+    path => "/var/log/apache/access.log"
+    type => "apache"
+  }
+}
+filter {
+  if "" {
+    mutate { remove => "secret" }
+  }
+}
+==>
+
+LogstashConfig(PluginSection(PluginType,"{",BranchOrPlugin(Plugin("{",Attribute,"}")),"}"))

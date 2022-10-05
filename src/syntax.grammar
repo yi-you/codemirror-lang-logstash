@@ -1,5 +1,6 @@
 @precedence {
   else @right,
+  equal @left,
   statement @cut,
   name,
   value
@@ -44,8 +45,8 @@ RegexpExpression { rvalue  regexp_operator (string | regexp) }
 
 @tokens {
     PluginType { "input" | "filter" | "output" }
-
-    compareOperator { "==" | "!=" | "<=" | ">=" | "<" | ">" }
+    CompareOp<expr> { expr }
+    compareOperator { LessThan | CompareOp<"==" | "!=" | "<=" | ">=" | ">"> }
     regexp_operator { "=~" | "!~" }
     boolean_operator { "and" | "or" | "xor" | "nand" }
     selector_element { "[" ![\]\[,]+ "]" }
@@ -68,6 +69,9 @@ RegexpExpression { rvalue  regexp_operator (string | regexp) }
     LineComment { "#" ![\n]* }
     whitespace { $[ \t\n\r]+ }
     "(" ")" "{" "}"
+    LessThan[@name=CompareOp] { "<" }
+    "="[@name=Equals]
+    "=>"[@name=Arrow]
  }
 
 @detectDelim
