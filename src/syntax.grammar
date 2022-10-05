@@ -1,79 +1,74 @@
-@top { branch_or_plugin+ }
+@precedence {
+  else @right,
+  statement @cut,
+  name,
+  boolean_operator,
+  value
+}
+
+@top LogstashConfig { topConfig+ }
 
 @skip { whitespace | LineComment }
 
-value { True | False | Null | Number | String | Object | Array }
+// Keywords
 
-Object { "{" list<Property>? "}" }
-Array  { "[" list<value>? "]" }
+kw<term> { @specialize[@name={term}]<name, term> }
 
-ParenthesizedExpression { "(" expression ")" }
+topConfig[@isGroup=Statement] {
+    PluginSection
+}
 
-Config { plugin_section (plugin_section)* }
-plugin_section { plugin_type "{" (branch_or_plugin)* "}"}
+// Config { PluginSection (PluginSection)* }
+PluginSection { PluginType "{" (BranchOrPlugin)* "}" }
+BranchOrPlugin { Branch | Plugin }
 
-branch_or_plugin { branch | plugin }
-plugin_type { "input" | "filter" | "output" }
-plugins { (plugin ( plugin)*)? }
-plugin { name "{" attributes:( attribute (whitespace attribute)*)? "}" }
-name { [A-Za-z0-9_-]+ | string }
-attribute { name "=>" value  }
-value {plugin | bareword | string | number | array | hash}
-array_value {bareword | string | number | array | hash}
-bareword {[A-Za-z_] [A-Za-z0-9_]+}
-double_quoted_string {'"' ( '\"' | !'"' . )* '"'}
-single_quoted_string { ( "'" ( "\\'" | !"'" . )* "'" }
-string {double_quoted_string | single_quoted_string}
-regexp {'/' ( '\/' | !'/' . )* '/' }
-number {"-"? [0-9]+ ("." [0-9]*)?}
-array {"["     ( value ("," value)* )?  "]"}
-hash {"{" hashentries? "}"}
-hashentries {hashentry (whitespace hashentry)*}
-hashentry {name:(number | bareword | string) "=>" value}
-branch { kw<"if"> ParenthesizedExpression statement (!else kw<"else"> statement)? }
-if_statement { condition statement }
-statement {"{" (branch_or_plugin _)* "}"}
-condition { expression (_ boolean_operator expression)* }
-expression { ("(" condition ")") | negative_expression | in_expression | not_in_expression | compare_expression | regexp_expression | rvalue}
-negative_expression { ("!" "(" condition ")") | ("!" selector)}
-in_expression {rvalue kw<"in"> rvalue}
-not_in_expression {rvalue "not" kw<"in"> rvalue}
-rvalue {string | number | selector | array | method_call | regexp}
-method_call {bareword "(" ( rvalue ( "," rvalue )* )? ")"}
-compare_expression {rvalue compare_operator rvalue}
-compare_operator {"==" | "!=" | "<=" | ">=" | "<" | ">"}
-regexp_expression {rvalue  regexp_operator (string | regexp)}
-regexp_operator {"=~" | "!~"}
-boolean_operator {"and" | "or" | "xor" | "nand"}
-selector {selector_element+}
-selector_element {"[" [^\]\[,]+ "]"}
+// Plugins { (Plugin ( Plugin)*)? }
+Plugin { name "{" (Attribute (Attribute)*)? "}" }
+Attribute { name "=>" value  }
+value { Plugin | bareWord | string | number | array | hash }
+array { "["     ( value ("," value)* )?  "]" }
+hash { "{" hashEntries? "}" }
+hashEntries { hashEntry (hashEntry)* }
+hashEntry { (number | bareWord | string) "=>" value }
+Branch { kw<"if"> condition statement (!else kw<"else"> statement)? }
+statement { "{" (BranchOrPlugin)* "}" }
+condition { expression (boolean_operator expression)* }
+expression { ("(" condition ")") | negativeExpression | InExpression | NotInExpression | CompareExpression | RegexpExpression | rvalue }
+negativeExpression { ("!" "(" condition ")") | ("!" Selector) }
+InExpression { rvalue kw<"in"> rvalue }
+NotInExpression { rvalue "not" kw<"in"> rvalue }
+rvalue { string | number | Selector | array | MethodCall | regexp }
+MethodCall { bareWord "(" ( rvalue ( "," rvalue )* )? ")" }
+CompareExpression { rvalue compareOperator rvalue }
+Selector { selector_element+ }
+RegexpExpression { rvalue  regexp_operator (string | regexp) }
 
 @tokens {
-  identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
-  word { identifierChar (identifierChar | @digit)* }
-  identifier { word }
+    PluginType { "input" | "filter" | "output" }
 
-  Identifier { $[a-zA-Z_\-0-9]+ }
-  True  { "true" }
-  False { "false" }
-  Null  { "null" }
+    compareOperator { "==" | "!=" | "<=" | ">=" | "<" | ">" }
+    regexp_operator { "=~" | "!~" }
+    boolean_operator { "and" | "or" | "xor" | "nand" }
+    selector_element { "[" ![\]\[,]+ "]" }
 
-  Number { '-'? int frac? exp?  }
-  int  { '0' | $[1-9] @digit* }
-  frac { '.' @digit+ }
-  exp  { $[eE] $[+\-]? @digit+ }
+    name { $[A-Za-z0-9_\-]+ | string }
 
-  String {
-    '"' (![\\\n"] | "\\" _)* '"'? |
-    "'" (![\\\n'] | "\\" _)* "'"?
-  }
-  Boolean { "#t" | "#f" }
+    // arrayValue { bareWord | string | number | array | hash }
+    bareWord { $[A-Za-z_] $[A-Za-z0-9_]+ }
+    double_quoted_string {'"' ( '\"' | ![\"])* '"'}
+    single_quoted_string { "'" ( "\\'" | !['])* "'" }
+    string {double_quoted_string | single_quoted_string}
+    // string {
+    //     '"' (![\\\n"] | "\\" _)* '"'? |
+    //     "'" (![\\\n'] | "\\" _)* "'"?
+    // }
+    regexp { "/" (![/\\\n[] | "\\" ![\n] | "[" (![\n\\\]] | "\\" ![\n])* "]")* "/" }
+    // regexp { '/' ( '\/' | !['/'])* '/' }
+    number { "-"? $[0-9]+ ("." $[0-9]*)? }
 
-  LineComment { "#" ![\n]* }
-
-  whitespace { $[ \t\n\r]+ }
-
-  "(" ")" "{" "}"
-}
+    LineComment { "#" ![\n]* }
+    whitespace { $[ \t\n\r]+ }
+    "(" ")" "{" "}"
+ }
 
 @detectDelim
