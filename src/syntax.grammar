@@ -2,7 +2,6 @@
   else @right,
   statement @cut,
   name,
-  boolean_operator,
   value
 }
 
@@ -23,7 +22,7 @@ PluginSection { PluginType "{" (BranchOrPlugin)* "}" }
 BranchOrPlugin { Branch | Plugin }
 
 // Plugins { (Plugin ( Plugin)*)? }
-Plugin { name "{" (Attribute (Attribute)*)? "}" }
+Plugin { bareWord "{" (Attribute (Attribute)*)? "}" }
 Attribute { name "=>" value  }
 value { Plugin | bareWord | string | number | array | hash }
 array { "["     ( value ("," value)* )?  "]" }
@@ -51,7 +50,7 @@ RegexpExpression { rvalue  regexp_operator (string | regexp) }
     boolean_operator { "and" | "or" | "xor" | "nand" }
     selector_element { "[" ![\]\[,]+ "]" }
 
-    name { $[A-Za-z0-9_\-]+ | string }
+    name { string }
 
     // arrayValue { bareWord | string | number | array | hash }
     bareWord { $[A-Za-z_] $[A-Za-z0-9_]+ }
