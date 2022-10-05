@@ -1,26 +1,54 @@
-@top Program { expression* }
+@top input filter output { expression* }
 
-@skip { space | LineComment }
+@skip { whitespace | LineComment }
+value { True | False | Null | Number | String | Object | Array }
 
-expression {
-  Identifier |
-  String |
-  Boolean |
-  Application { "(" expression* ")" }
+Object { "{" list<Property>? "}" }
+Array  { "[" list<value>? "]" }
+
+Property { PropertyName "=>" value }
+PropertyName { word | String }
+plugin_section {
+  input { "{" expression* "}" } |
+  filter { "{" expression* "}" } |
+  output { "{" expression* "}" }
 }
 
+branch_or_plugin {
+}
+
+plugin_type { "input" | "filter" | "output" }
+
+plugins { (plugin (plugin)*)? }
+
+plugin
+
 @tokens {
+  identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
+  word { identifierChar (identifierChar | @digit)* }
+  identifier { word }
+
   Identifier { $[a-zA-Z_\-0-9]+ }
+  True  { "true" }
+  False { "false" }
+  Null  { "null" }
 
-  String { '"' (!["\\] | "\\" _)* '"' }
+  Number { '-'? int frac? exp?  }
+  int  { '0' | $[1-9] @digit* }
+  frac { '.' @digit+ }
+  exp  { $[eE] $[+\-]? @digit+ }
 
+  String {
+    '"' (![\\\n"] | "\\" _)* '"'? |
+    "'" (![\\\n'] | "\\" _)* "'"?
+  }
   Boolean { "#t" | "#f" }
 
-  LineComment { ";" ![\n]* }
+  LineComment { "#" ![\n]* }
 
-  space { $[ \t\n\r]+ }
+  whitespace { $[ \t\n\r]+ }
 
-  "(" ")"
+  "(" ")" "{" "}"
 }
 
 @detectDelim
