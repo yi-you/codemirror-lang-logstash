@@ -1,6 +1,5 @@
 @precedence {
   else @right,
-  equal @left,
   statement @cut,
   name,
   value
@@ -23,20 +22,22 @@ PluginSection { PluginType "{" (BranchOrPlugin)* "}" }
 BranchOrPlugin { Branch | Plugin }
 
 // Plugins { (Plugin ( Plugin)*)? }
-Plugin { bareWord "{" (Attribute (Attribute)*)? "}" }
+Plugin { name "{" (Attribute (Attribute)*)? "}" }
 Attribute { name "=>" value  }
 value { Plugin | bareWord | string | number | array | hash }
-array { "["     ( value ("," value)* )?  "]" }
+array { "[" ( value ("," value)* )?  "]" }
 hash { "{" hashEntries? "}" }
 hashEntries { hashEntry (hashEntry)* }
 hashEntry { (number | bareWord | string) "=>" value }
+
 Branch { kw<"if"> condition statement (!else kw<"else"> statement)? }
 statement { "{" (BranchOrPlugin)* "}" }
 condition { expression (boolean_operator expression)* }
+boolean_operator { kw<"and"> | kw<"or"> | kw<"xor"> | kw<"nand"> }
 expression { ("(" condition ")") | negativeExpression | InExpression | NotInExpression | CompareExpression | RegexpExpression | rvalue }
 negativeExpression { ("!" "(" condition ")") | ("!" Selector) }
 InExpression { rvalue kw<"in"> rvalue }
-NotInExpression { rvalue "not" kw<"in"> rvalue }
+NotInExpression { rvalue kw<"not"> kw<"in"> rvalue }
 rvalue { string | number | Selector | array | MethodCall | regexp }
 MethodCall { bareWord "(" ( rvalue ( "," rvalue )* )? ")" }
 CompareExpression { rvalue compareOperator rvalue }
@@ -48,10 +49,9 @@ RegexpExpression { rvalue  regexp_operator (string | regexp) }
     CompareOp<expr> { expr }
     compareOperator { LessThan | CompareOp<"==" | "!=" | "<=" | ">=" | ">"> }
     regexp_operator { "=~" | "!~" }
-    boolean_operator { "and" | "or" | "xor" | "nand" }
     selector_element { "[" ![\]\[,]+ "]" }
 
-    name { string }
+    name { $[A-Za-z0-9_\-]+ | string }
 
     // arrayValue { bareWord | string | number | array | hash }
     bareWord { $[A-Za-z_] $[A-Za-z0-9_]+ }
@@ -70,8 +70,6 @@ RegexpExpression { rvalue  regexp_operator (string | regexp) }
     whitespace { $[ \t\n\r]+ }
     "(" ")" "{" "}"
     LessThan[@name=CompareOp] { "<" }
-    "="[@name=Equals]
-    "=>"[@name=Arrow]
  }
 
 @detectDelim

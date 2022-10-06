@@ -29,22 +29,7 @@ LogstashConfig(PluginSection(PluginType,"{",BranchOrPlugin(Plugin("{",Attribute,
 
 # Booleans2
 
-input {
-  file {
-    path => "/var/log/messages"
-    type => "syslog"
-  }
-
-  file {
-    path => "/var/log/apache/access.log"
-    type => "apache"
-  }
-}
-filter {
-  if "" {
-    mutate { remove => "secret" }
-  }
-}
+filter { if "" {} }
 ==>
 
-LogstashConfig(PluginSection(PluginType,"{",BranchOrPlugin(Plugin("{",Attribute,"}")),"}"))
+LogstashConfig(PluginSection(PluginType,"{",BranchOrPlugin(Branch(if,"{","}")),"}"))

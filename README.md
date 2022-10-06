@@ -1,7 +1,23 @@
-# CodeMirror 6 language package template
+# CodeMirror 6 language-logstash
 
-regexp
-double_quoted_string / single_quoted_string
+I tried to translate 
+[logstash config grammar](https://github.com/elastic/logstash/blob/433b341f0f0c6f7b992d5226599d380ef722173b/logstash-core/lib/logstash/config/grammar.treetop)
+([local grammar file](src/grammar.treetop))
+ to CodeMirror language.
+
+But Compiled with some error
+
+> Error: Could not load D:\Projects\GitHub\codemirror6\lang-example\src\syntax.grammar (imported by src/index.ts): Overlapping tokens name and string used in same context (example: "\"\"")
+> After: PluginType "{" name/"if" "["
+> 
+> Overlapping tokens name and number used in same context (example: "-" vs "-0")
+> After: PluginType "{" name/"if" "["
+> 
+> Overlapping tokens name and bareWord used in same context (example: "A" vs "A0")
+> After: PluginType "{" name/"if" "[" (D:\Projects\GitHub\codemirror6\lang-example\src\syntax.grammar 1:1)
+
+
+## Source
 
 This is an logstash repository containing a minimal [CodeMirror](https://codemirror.net/6/) language support package. The idea is to clone it, rename it, and edit it to create support for a new language.
 
