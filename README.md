@@ -1,5 +1,7 @@
 # CodeMirror 6 language-logstash
 
+Please see [Rutzzz/lang-logstash](https://github.com/Rutzzz/lang-logstash)
+
 I tried to translate 
 [logstash config grammar](https://github.com/elastic/logstash/blob/433b341f0f0c6f7b992d5226599d380ef722173b/logstash-core/lib/logstash/config/grammar.treetop)
 ([local grammar file](src/grammar.treetop))
